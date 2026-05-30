@@ -4,7 +4,7 @@ An AI-assisted finance-review application for the Northwind Logistics case study
 
 Human reviewers make the final decision. The application is intentionally conservative: incomplete evidence becomes `needs_review`, not `compliant`.
 
-The public repository intentionally excludes the hiring-team attachments and private evaluation package. When those local files are absent, startup loads an independently generated synthetic demo dataset from `app/public_demo.py`. Evaluators can upload held-out receipts through the browser or evaluation API.
+The public repository intentionally excludes the team attachments and private evaluation package. When those local files are absent, startup loads an independently generated synthetic demo dataset from `app/public_demo.py`. Evaluators can upload held-out receipts through the browser or evaluation API.
 
 ## Run locally
 
