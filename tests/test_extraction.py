@@ -39,3 +39,12 @@ def test_image_uploads_degrade_to_review_without_model(monkeypatch):
         assert text == ""
         assert facts.confidence == 0.0
         assert facts.missing_fields == ["openai_api_key"]
+
+
+def test_model_error_is_not_exposed_in_review_output(monkeypatch):
+    def fail_model(*_args, **_kwargs):
+        raise RuntimeError("provider response with internal details")
+
+    monkeypatch.setattr(extraction, "_extract_with_openai", fail_model)
+    _text, facts = extract_receipt("receipt.png", "image/png", b"image-placeholder")
+    assert facts.missing_fields == ["model_fallback_failed"]

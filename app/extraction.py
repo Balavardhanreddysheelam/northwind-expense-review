@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import logging
 import re
 from datetime import datetime
 from io import BytesIO
@@ -12,6 +13,8 @@ from pypdf import PdfReader
 from app.config import settings
 from app.schemas import FlightSegment, LineItem, ReceiptFacts
 
+
+logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".txt"}
 ALCOHOL_WORDS = {
@@ -272,8 +275,9 @@ def extract_receipt(filename: str, content_type: str, content: bytes) -> tuple[s
             return text, facts
     try:
         return text, _extract_with_openai(filename, content_type, content, text)
-    except Exception as exc:
+    except Exception:
+        logger.exception("Receipt model fallback failed for %s", filename)
         facts = parse_text_receipt(text) if text.strip() else ReceiptFacts()
         facts.confidence = min(facts.confidence, 0.45)
-        facts.missing_fields = sorted(set([*facts.missing_fields, f"model_fallback_failed: {exc}"]))
+        facts.missing_fields = sorted(set([*facts.missing_fields, "model_fallback_failed"]))
         return text, facts

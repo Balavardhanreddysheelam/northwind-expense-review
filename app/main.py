@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -18,6 +19,10 @@ from app.policy import citation_is_faithful
 from app.rules import review_submission
 from app.schemas import EvalReceiptRequest
 from app.services import answer_policy_question, create_submission, initialize_database
+
+
+def _safe_download_name(filename: str) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]", "_", filename) or "receipt"
 
 
 @asynccontextmanager
@@ -152,7 +157,7 @@ def download_receipt(receipt_id: int, db: Session = Depends(get_db)):
     return Response(
         content=receipt.file_bytes,
         media_type=receipt.content_type,
-        headers={"Content-Disposition": f'inline; filename="{receipt.filename}"'},
+        headers={"Content-Disposition": f'inline; filename="{_safe_download_name(receipt.filename)}"'},
     )
 
 

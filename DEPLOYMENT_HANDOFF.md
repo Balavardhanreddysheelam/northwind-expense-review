@@ -1,10 +1,12 @@
 # Render Deployment Handoff
 
-This repository is ready to deploy through a Render Blueprint:
+Live service: [`https://northwind-expense-review.onrender.com`](https://northwind-expense-review.onrender.com)
+
+This repository can be redeployed through a Render Blueprint:
 
 [`https://dashboard.render.com/blueprint/new?repo=https://github.com/Balavardhanreddysheelam/northwind-expense-review`](https://dashboard.render.com/blueprint/new?repo=https://github.com/Balavardhanreddysheelam/northwind-expense-review)
 
-The public repository intentionally excludes the hiring-team attachments and private evaluation package. The deployed application uses the synthetic demo dataset in `app/public_demo.py`. Reviewers can upload held-out receipts through the browser.
+The public repository excludes the hiring-team attachments and private evaluation package. The deployed application uses the synthetic demo dataset in `app/public_demo.py`. Reviewers can upload held-out receipts through the browser.
 
 ## Resources Render should create
 
@@ -39,12 +41,10 @@ The first build can take several minutes. A free web service can take about one 
 
 ## Live verification
 
-Replace `<render-url>` with the service URL and verify:
-
 | Check | URL or action | Expected result |
 |---|---|---|
-| Health | `<render-url>/health` | `{"status":"ok"}` |
-| Dashboard | `<render-url>/` | Synthetic demo submissions are visible |
+| Health | [`/health`](https://northwind-expense-review.onrender.com/health) | `{"status":"ok"}` |
+| Dashboard | [`/`](https://northwind-expense-review.onrender.com/) | Synthetic demo submissions are visible |
 | Flagged review | Open the flagged demo submission | Findings include exact policy quotations |
 | Policy answer | Ask `What is the dinner meal cap?` | Grounded answer with a cited clause |
 | Refusal path | Ask `What is the weather tomorrow?` | Explicit refusal |
@@ -59,4 +59,3 @@ Replace `<render-url>` with the service URL and verify:
 - If the site is slow on the first request, allow the free web service to wake.
 - If model calls fail, rotate the OpenAI key and update only the Render secret.
 - Free Render PostgreSQL databases expire after 30 days. Upgrade if the review window requires longer availability.
-

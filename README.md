@@ -1,10 +1,12 @@
 # Northwind Logistics Expense Pre-Review
 
-An AI-assisted finance-review application for the Northwind Logistics case study. It ingests mixed-format receipts, extracts expense facts, applies policy checks, shows exact supporting clauses, records reviewer overrides, preserves submission history, and answers grounded policy questions with an explicit refusal path.
+A finance-review application for receipt extraction, policy checks, cited findings, reviewer overrides, submission history, and policy questions.
 
-Human reviewers make the final decision. The application is intentionally conservative: incomplete evidence becomes `needs_review`, not `compliant`.
+The application separates extraction from judgment. OpenAI models handle image receipts and policy embeddings. Explicit policy rules run in Python. Missing or low-confidence evidence becomes `needs_review`, never `compliant`.
 
-The public repository intentionally excludes the hiring-team attachments and private evaluation package. When those local files are absent, startup loads an independently generated synthetic demo dataset from `app/public_demo.py`. Evaluators can upload held-out receipts through the browser or evaluation API.
+Live demo: [`https://northwind-expense-review.onrender.com`](https://northwind-expense-review.onrender.com)
+
+The public repository excludes the hiring-team attachments and private evaluation package. When those local files are absent, startup loads a synthetic demo dataset from `app/public_demo.py`. Reviewers can upload held-out receipts through the browser or evaluation API.
 
 ## Run locally
 
@@ -38,7 +40,7 @@ flowchart LR
   API --> DB["SQLite locally / Render Postgres deployed"]
   API --> EX["Receipt extractor"]
   EX --> LOCAL["Local PDF/TXT parser"]
-  EX --> LLM["OpenAI gpt-5.4-mini fallback"]
+  EX --> LLM["OpenAI receipt extraction fallback"]
   API --> RULES["Deterministic policy checks"]
   API --> RET["Hybrid policy retrieval"]
   RET --> EMB["text-embedding-3-small"]
@@ -69,7 +71,7 @@ This application has a narrow retrieval surface and strict audit requirements. D
 
 ### Why deterministic rules after extraction?
 
-Meal caps, lodging tiers, solo-alcohol restrictions, conference-included meals, premium-flight thresholds, and approval routing are explicit. Code is cheaper to test and easier to audit than asking a model to reinterpret those clauses on every receipt. The model is reserved for messy evidence and future ambiguous adjudication.
+Meal caps, lodging tiers, solo-alcohol restrictions, conference-included meals, premium-flight thresholds, and approval routing are explicit. Python rules are easier to test and audit than asking a model to reinterpret those clauses for every receipt. The model is reserved for image receipts and incomplete local extraction.
 
 ### Why SQLite locally and Postgres in the demo?
 
@@ -115,9 +117,9 @@ The harness reports:
 
 ## Verification evidence
 
-The local release was falsified before packaging:
+The release was tested before packaging:
 
-- `pytest -q`: 8 focused tests passed, including the supplied sample pattern, faithful citations, refusal behavior, unsafe file rejection, JPG/PNG conservative fallback, parser regression coverage, and Render Postgres URL normalization.
+- `pytest -q`: focused tests cover the supplied sample pattern, faithful citations, refusal behavior, unsafe file rejection, JPG/PNG conservative fallback, provider-error redaction, download filename sanitization, parser regression coverage, and Render Postgres URL normalization.
 - `python scripts/smoke_report.py`: Denver remained compliant; Boston flagged the conference-included lunch; Chicago flagged the dinner cap; Austin flagged solo alcohol; Seattle flagged the lodging cap and outside-Concur booking.
 - `python scripts/evaluate.py --dataset eval/sample_eval.json --base-url http://127.0.0.1:8000`: the included sanity dataset reported `1.0` for category accuracy, verdict accuracy, violation recall, retrieval recall, citation faithfulness, refusal accuracy, and extraction completeness. This is a wiring check, not a claimed production benchmark.
 - Restart proof: a reviewer override remained visible after stopping and relaunching the server, then the verification-only override was removed.
@@ -138,13 +140,15 @@ For 10,000 submissions per day:
 
 ## Deploy on Render
 
-The repository includes [`render.yaml`](render.yaml). Create a Render Blueprint from the public GitHub repository, provide `OPENAI_API_KEY` when prompted, and deploy. Render creates the FastAPI web service and Postgres database. Free Render web services can take about one minute to wake after inactivity, and free Postgres databases expire after 30 days; upgrade them if the review window requires stronger availability.
+The live demo is available at [`https://northwind-expense-review.onrender.com`](https://northwind-expense-review.onrender.com). The repository includes [`render.yaml`](render.yaml), which provisions the FastAPI web service and Postgres database. Free Render web services can take about one minute to wake after inactivity, and free Postgres databases expire after 30 days; upgrade them if the review window requires stronger availability.
 
 The exact Dashboard steps, expected resources, environment variables, and live smoke checks are listed in [`DEPLOYMENT_HANDOFF.md`](DEPLOYMENT_HANDOFF.md).
 
+For a reviewer-oriented summary of the design, evidence, tradeoffs, and scale path, see [`CASE_STUDY.md`](CASE_STUDY.md).
+
 ## Limitations and next work
 
-- Local extraction is intentionally optimized for text-readable receipts. Images and scans need the configured OpenAI vision fallback.
+- Local extraction is optimized for text-readable receipts. Images and scans need the configured OpenAI vision fallback.
 - The demo processes receipts synchronously. Production processing belongs on a durable queue.
 - Postgres blob storage is appropriate for the case-study deployment, not high-volume receipt retention.
 - The assistant is extractive. Add constrained synthesis and retrieval eval expansion after establishing a labeled policy-question set.

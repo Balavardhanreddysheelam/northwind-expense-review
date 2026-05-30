@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.db import SessionLocal, _normalize_database_url
-from app.main import app
+from app.main import _safe_download_name, app
 from app.models import Submission
 from app.policy import citation_is_faithful
 
@@ -62,3 +62,7 @@ def test_render_postgres_url_uses_psycopg3_dialect():
         _normalize_database_url("postgresql://user:pass@host/db")
         == "postgresql+psycopg://user:pass@host/db"
     )
+
+
+def test_download_filename_is_header_safe():
+    assert _safe_download_name('receipt"\r\nunsafe.txt') == "receipt___unsafe.txt"
