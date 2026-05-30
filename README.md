@@ -6,7 +6,7 @@ The application separates extraction from judgment. OpenAI models handle image r
 
 Live demo: [`https://northwind-expense-review.onrender.com`](https://northwind-expense-review.onrender.com)
 
-The public repository excludes the hiring-team attachments and private evaluation package. When those local files are absent, startup loads a synthetic demo dataset from `app/public_demo.py`. Reviewers can upload held-out receipts through the browser or evaluation API.
+The public repository intentionally excludes the team attachments and private evaluation package. When those local files are absent, startup loads an independently generated synthetic demo dataset from `app/public_demo.py`. Evaluators can upload held-out receipts through the browser or evaluation API.
 
 ## Run locally
 
