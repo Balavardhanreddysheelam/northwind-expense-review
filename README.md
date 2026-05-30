@@ -140,6 +140,8 @@ For 10,000 submissions per day:
 
 The repository includes [`render.yaml`](render.yaml). Create a Render Blueprint from the public GitHub repository, provide `OPENAI_API_KEY` when prompted, and deploy. Render creates the FastAPI web service and Postgres database. Free Render web services can take about one minute to wake after inactivity, and free Postgres databases expire after 30 days; upgrade them if the review window requires stronger availability.
 
+The exact Dashboard steps, expected resources, environment variables, and live smoke checks are listed in [`DEPLOYMENT_HANDOFF.md`](DEPLOYMENT_HANDOFF.md).
+
 ## Limitations and next work
 
 - Local extraction is intentionally optimized for text-readable receipts. Images and scans need the configured OpenAI vision fallback.
